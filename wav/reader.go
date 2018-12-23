@@ -6,10 +6,9 @@ import (
 	"time"
 )
 
-const headerSize = 40
-
 // The Reader reads and assembles segments of the named wav-files within the given time frame
 type Reader struct {
+	base                string
 	directories         []string
 	directoryToFilesMap map[string][]os.FileInfo
 }
@@ -40,6 +39,7 @@ func NewReader(base string, start time.Time, end time.Time, patterns []string) (
 	}
 
 	reader := &Reader{
+		base:                base,
 		directories:         directories,
 		directoryToFilesMap: directoryToFilesMap,
 	}
@@ -57,5 +57,5 @@ func (reader *Reader) GetAggregatedWavFile(directory string) (*AggregatedWavFile
 		return nil, fmt.Errorf("Unknown directory %s", directory)
 	}
 
-	return NewAggregatedWavFile(files), nil
+	return NewAggregatedWavFile(reader.base, directory, files), nil
 }

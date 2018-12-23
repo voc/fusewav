@@ -32,7 +32,7 @@ func wavFileAttr(fs *WavFsImpl, matches []string) (*fuse.Attr, fuse.Status) {
 	aggregatedWavFile, err := fs.reader.GetAggregatedWavFile(directory)
 	if err != nil {
 		fmt.Printf("Error creating aggregated File: %s", err)
-		return nil, fuse.ENOENT
+		return nil, fuse.EIO
 	}
 
 	return &fuse.Attr{
@@ -61,7 +61,10 @@ func (f *delegatingFuseFile) GetAttr(out *fuse.Attr) fuse.Status {
 }
 
 func (f *delegatingFuseFile) Read(buf []byte, off int64) (res fuse.ReadResult, code fuse.Status) {
-	f.aggregatedWavFile.Read(buf, off)
+	err := f.aggregatedWavFile.Read(buf, off)
+	if err != nil {
+		return nil, fuse.EIO
+	}
 
 	return fuse.ReadResultData(buf), fuse.OK
 }
