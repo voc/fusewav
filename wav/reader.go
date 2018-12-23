@@ -2,16 +2,16 @@ package wav
 
 import (
 	"fmt"
-	"path/filepath"
+	"os"
 	"time"
 )
 
+const headerSize = 40
+
 // The Reader reads and assembles segments of the named wav-files within the given time frame
 type Reader struct {
-	base        string
-	start       time.Time
-	end         time.Time
-	directories []string
+	directories         []string
+	directoryToFilesMap map[string][]os.FileInfo
 }
 
 // NewReader constructs a new Wav-Reader instance
@@ -24,11 +24,24 @@ func NewReader(base string, start time.Time, end time.Time, patterns []string) (
 	}
 	fmt.Printf("Matching directories: %s\n", directories)
 
+	directoryToFilesMap := make(map[string][]os.FileInfo)
+	for _, directory := range directories {
+		files, err := findMatchingFiles(base, directory, start, end)
+		if err != nil {
+			return nil, err
+		}
+
+		filenames := make([]string, len(files))
+		for i, file := range files {
+			filenames[i] = file.Name()
+		}
+		fmt.Printf("Matching files in directory %s: %s\n", directory, filenames)
+		directoryToFilesMap[directory] = files
+	}
+
 	reader := &Reader{
-		base:        base,
-		start:       start,
-		end:         end,
-		directories: directories,
+		directories:         directories,
+		directoryToFilesMap: directoryToFilesMap,
 	}
 	return reader, nil
 }
@@ -38,21 +51,11 @@ func (reader *Reader) ListMatchingDirectories() []string {
 	return reader.directories
 }
 
-func findDirectoriesMatching(base string, patterns []string) ([]string, error) {
-	matches := make([]string, 0)
-	for _, pattern := range patterns {
-		pathForPattern := filepath.Join(base, pattern)
-		matchesForPattern, _ := filepath.Glob(pathForPattern)
-
-		if len(matchesForPattern) == 0 {
-			return nil, fmt.Errorf("No directories for pattern %s found in basedir %s", pattern, base)
-		}
-
-		for _, match := range matchesForPattern {
-			relativeMatch, _ := filepath.Rel(base, match)
-			matches = append(matches, relativeMatch)
-		}
+func (reader *Reader) GetAggregatedWavFile(directory string) (*AggregatedWavFile, error) {
+	files, ok := reader.directoryToFilesMap[directory]
+	if !ok {
+		return nil, fmt.Errorf("Unknown directory %s", directory)
 	}
 
-	return matches, nil
+	return NewAggregatedWavFile(files), nil
 }

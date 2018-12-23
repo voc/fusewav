@@ -1,8 +1,6 @@
 package fs
 
 import (
-	"strings"
-
 	"github.com/hanwen/go-fuse/fuse"
 )
 
@@ -10,9 +8,9 @@ func wavDirList(fs *WavFsImpl, _ []string) ([]fuse.DirEntry, fuse.Status) {
 	mathingDirectories := fs.reader.ListMatchingDirectories()
 	entries := make([]fuse.DirEntry, len(mathingDirectories))
 
-	for i, directory := range mathingDirectories {
-		entries[i] = fuse.DirEntry{
-			Name: strings.Replace(directory, "/", "_", -1) + ".wav",
+	for index, directory := range mathingDirectories {
+		entries[index] = fuse.DirEntry{
+			Name: filenameFromDirectoryName(directory),
 			Mode: fuse.S_IFREG | 0644,
 		}
 	}

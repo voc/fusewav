@@ -34,7 +34,7 @@ var paths = [...]path{
 		readFn: nil,
 	},
 	{
-		regex:  compileOrNil("^([^/]+).wav$"),
+		regex:  compileOrNil("^([^/\\.]+\\.wav)$"),
 		attrFn: wavFileAttr,
 		listFn: nil,
 		readFn: wavFileRead,
