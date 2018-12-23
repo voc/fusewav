@@ -11,12 +11,14 @@ const headerSize = int64(44)
 const offsetFileSize = int64(4)
 const offsetDataBlockSize = int64(40)
 
+// The AggregatedWavFile Object represents a set of aggregated Wav-Files in the given directory
 type AggregatedWavFile struct {
 	files     []os.FileInfo
 	base      string
 	directory string
 }
 
+// NewAggregatedWavFile constructs a new AggregatedWavFile Object
 func NewAggregatedWavFile(base string, directory string, files []os.FileInfo) *AggregatedWavFile {
 	file := &AggregatedWavFile{
 		files:     files,
@@ -26,6 +28,7 @@ func NewAggregatedWavFile(base string, directory string, files []os.FileInfo) *A
 	return file
 }
 
+// Filesize calculates the exact size of a Wav-Header plus all Data-Bytes from all aggregated Wav-Files
 func (f *AggregatedWavFile) Filesize() uint64 {
 	var sum uint64
 	for index, file := range f.files {
@@ -38,6 +41,7 @@ func (f *AggregatedWavFile) Filesize() uint64 {
 	return sum
 }
 
+// Read performs a read in the reconstructed Header or the Wav-File(s) backing the requested Area
 func (f *AggregatedWavFile) Read(buf []byte, off int64) error {
 	inOffset := off
 	outOffset := int64(0)

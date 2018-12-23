@@ -51,6 +51,7 @@ func (reader *Reader) ListMatchingDirectories() []string {
 	return reader.directories
 }
 
+// GetAggregatedWavFile creates a new AggregatedWavFile representing all Wav-Files in the Time-Window in the given directory
 func (reader *Reader) GetAggregatedWavFile(directory string) (*AggregatedWavFile, error) {
 	files, ok := reader.directoryToFilesMap[directory]
 	if !ok {
