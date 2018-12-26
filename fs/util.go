@@ -11,7 +11,7 @@ func filenameFromDirectoryName(directoryName string) string {
 }
 
 func findDirectoryForFilename(reader *wav.Reader, filename string) string {
-	for _, directory := range reader.ListMatchingDirectories() {
+	for _, directory := range reader.ListDirectories() {
 		if filename == filenameFromDirectoryName(directory) {
 			return directory
 		}

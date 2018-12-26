@@ -15,13 +15,13 @@ const exitCodeRuntimeError = 2
 
 func main() {
 	base := flag.String("base", "/video/audio-backup", "The root-folder of the recorded segments.")
-	start := flag.String("start", "", "The first used segment will be the one which contains this Point in Time. Format: 2018-12-23_00-46-35")
-	end := flag.String("end", "", "The last used segment will be the one which contains this Point in Time. Format: 2018-12-23_00-46-35")
+	start := flag.String("start", "", "The first used segment will be the one which contains this Point in Time. Format: 2018-12-23 00:46")
+	end := flag.String("end", "", "The last used segment will be the one which contains this Point in Time. Format: 2018-12-23 00:46")
 	mountpoint := flag.String("mountpoint", "", "Path to mount the assembled view of all segments.")
 	flag.Parse()
 
 	if *base == "" || *start == "" || *end == "" || *mountpoint == "" {
-		fmt.Printf("Required Fields: base, start, end\n")
+		fmt.Printf("Required Fields: base, start, end, mountpoint\n")
 		flag.Usage()
 		os.Exit(exitCodeConfigError)
 	}
@@ -35,7 +35,7 @@ func main() {
 		os.Exit(exitCodeConfigError)
 	}
 
-	reader, err := wav.NewReader(*base, startDate, endDate, flag.Args())
+	reader, err := wav.NewReader(*base, startDate, endDate)
 	if err != nil {
 		fmt.Printf("Error constructing Wav-Reader: %s", err)
 		os.Exit(exitCodeConfigError)

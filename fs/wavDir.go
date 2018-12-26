@@ -5,10 +5,10 @@ import (
 )
 
 func wavDirList(fs *WavFsImpl, _ []string) ([]fuse.DirEntry, fuse.Status) {
-	mathingDirectories := fs.reader.ListMatchingDirectories()
-	entries := make([]fuse.DirEntry, len(mathingDirectories))
+	directories := fs.reader.ListDirectories()
+	entries := make([]fuse.DirEntry, len(directories))
 
-	for index, directory := range mathingDirectories {
+	for index, directory := range directories {
 		entries[index] = fuse.DirEntry{
 			Name: filenameFromDirectoryName(directory),
 			Mode: fuse.S_IFREG | 0644,

@@ -8,20 +8,22 @@ import (
 	"time"
 )
 
-func findDirectoriesMatching(base string, patterns []string) ([]string, error) {
+func findDirectories(base string) ([]string, error) {
 	matches := make([]string, 0)
-	for _, pattern := range patterns {
-		pathForPattern := filepath.Join(base, pattern)
-		matchesForPattern, _ := filepath.Glob(pathForPattern)
 
-		if len(matchesForPattern) == 0 {
-			return nil, fmt.Errorf("No directories for pattern %s found in basedir %s", pattern, base)
+	err := filepath.Walk(base, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
 		}
+		if info.IsDir() {
+			relpath, _ := filepath.Rel(base, path)
+			matches = append(matches, relpath)
+		}
+		return nil
+	})
 
-		for _, match := range matchesForPattern {
-			relativeMatch, _ := filepath.Rel(base, match)
-			matches = append(matches, relativeMatch)
-		}
+	if err != nil {
+		return nil, err
 	}
 
 	return matches, nil
@@ -50,7 +52,7 @@ func findMatchingFiles(base string, directory string, start time.Time, end time.
 		basename := filename[:len(filename)-4]
 		time, err := time.Parse(format, basename)
 		if err != nil {
-			fmt.Printf("Wav-File with incompatible name skipped: %s", filename)
+			fmt.Printf("Wav-File with incompatible name skipped: %s\n", filename)
 			continue
 		}
 
@@ -75,7 +77,7 @@ func findMatchingFiles(base string, directory string, start time.Time, end time.
 	}
 
 	if len(matches) == 0 {
-		return nil, fmt.Errorf("No files in directory %s matched the requested timeframe %s - %s", directory, start, end)
+		fmt.Printf("No files in directory %s matched the requested timeframe %s - %s\n", directory, start, end)
 	}
 
 	return matches, nil

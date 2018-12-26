@@ -14,20 +14,25 @@ type Reader struct {
 }
 
 // NewReader constructs a new Wav-Reader instance
-func NewReader(base string, start time.Time, end time.Time, patterns []string) (*Reader, error) {
-	fmt.Printf("Initializing reader for segments in %s matching %s between %s and %s\n", base, patterns, start, end)
+func NewReader(base string, start time.Time, end time.Time) (*Reader, error) {
+	fmt.Printf("Initializing reader for segments in %s between %s and %s\n", base, start, end)
 
-	directories, err := findDirectoriesMatching(base, patterns)
+	directoriesToConsider, err := findDirectories(base)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("Matching directories: %s\n", directories)
+	fmt.Printf("Considering directories: %s\n", directoriesToConsider)
 
+	directories := make([]string, 0)
 	directoryToFilesMap := make(map[string][]os.FileInfo)
-	for _, directory := range directories {
+	for _, directory := range directoriesToConsider {
 		files, err := findMatchingFiles(base, directory, start, end)
 		if err != nil {
 			return nil, err
+		}
+
+		if len(files) == 0 {
+			continue
 		}
 
 		filenames := make([]string, len(files))
@@ -36,6 +41,7 @@ func NewReader(base string, start time.Time, end time.Time, patterns []string) (
 		}
 		fmt.Printf("Matching files in directory %s: %s\n", directory, filenames)
 		directoryToFilesMap[directory] = files
+		directories = append(directories, directory)
 	}
 
 	reader := &Reader{
@@ -46,8 +52,8 @@ func NewReader(base string, start time.Time, end time.Time, patterns []string) (
 	return reader, nil
 }
 
-// ListMatchingDirectories matches the given patterns against the existing Directories and returns matching ones
-func (reader *Reader) ListMatchingDirectories() []string {
+// ListDirectories matches lists all Directories in the base-dir which have audio-files in the requested range
+func (reader *Reader) ListDirectories() []string {
 	return reader.directories
 }
 
